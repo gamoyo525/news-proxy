@@ -1,0 +1,12 @@
+{
+  "name": "news-proxy",
+  "version": "1.0.0",
+  "description": "A simple proxy server for news",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
