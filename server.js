@@ -4,33 +4,41 @@ const cors = require("cors");
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
-const BASE_URL = "https://newsapi.org";
+const NEWS_API_URL = "https://newsapi.org";
+const TRANSLATE_API_URL = "https://libretranslate.com";
 
-app.use("/", async (req, res) => {
-  const url = `${BASE_URL}${req.url}`;
-  console.log(`Proxying request to: ${url}`);
-
+app.use("/v2", async (req, res) => {
+  const url = `${NEWS_API_URL}${req.originalUrl}`;
   try {
     const response = await fetch(url, {
-      headers: {
-        "Authorization": req.headers["authorization"], // APIキーをフロントエンドから渡す
-      },
+      headers: { Authorization: req.headers["authorization"] },
     });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch: ${response.statusText}`);
-    }
-
-    const data = await response.json(); // レスポンスを JSON で取得
-    res.status(response.status).json(data);
-  } catch (err) {
-    console.error("Error:", err);
-    res.status(500).json({ error: "Proxy error" });
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error("NewsAPI fetch error:", error);
+    res.status(500).json({ error: "NewsAPI proxy error" });
   }
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Proxy server running on port ${port}`);
+app.post("/translate", async (req, res) => {
+  try {
+    const response = await fetch(`${TRANSLATE_API_URL}/translate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req.body),
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error("Translate proxy error:", error);
+    res.status(500).json({ error: "Translation proxy error" });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Proxy server is running on port ${PORT}`);
 });
