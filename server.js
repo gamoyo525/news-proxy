@@ -14,24 +14,14 @@ app.use("/", async (req, res) => {
   try {
     const response = await fetch(url, {
       headers: {
-        "Authorization": req.headers["authorization"], // または apiKeyをクエリに含める
+        "Authorization": req.headers["authorization"], // APIキーをフロントエンドから渡す
       },
     });
 
-    const data = await response.text(); // JSONではなく text にすることで柔軟に
-    res.status(response.status).send(data);
-  } catch (err) {
-    console.error("Error:", err);
-    res.status(500).send("Proxy error");
-  }
-});
+    if (!response.ok) {
+      throw new Error(`Failed to fetch: ${response.statusText}`);
+    }
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Proxy server running on port ${port}`);
-});
-"dependencies": {
-  "express": "^4.18.2",
-  "cors": "^2.8.5",
-  "node-fetch": "^2.6.7"
-}
+    const data = await response.json(); // レスポンスを JSON で取得
+    res.status(response.status).
+      
