@@ -6,13 +6,17 @@ const app = express();
 app.use(cors());
 
 const BASE_URL = "https://newsapi.org";
-const API_KEY = process.env.NEWS_API_KEY;
 
 app.use("/", async (req, res) => {
-  const targetUrl = `${BASE_URL}${req.url}`;
+  const url = `${BASE_URL}${req.url}`;
+  const apiKey = req.headers["x-api-key"]; // ← フロントエンドからこのヘッダーで送る！
+
+  if (!apiKey) {
+    return res.status(400).json({ error: "Missing API key in request headers" });
+  }
 
   try {
-    const response = await fetch(targetUrl + `&apiKey=${API_KEY}`);
+    const response = await fetch(url + `&apiKey=${apiKey}`);
     const data = await response.json();
     res.status(response.status).json(data);
   } catch (err) {
