@@ -30,3 +30,8 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Proxy server running on port ${port}`);
 });
+"dependencies": {
+  "express": "^4.18.2",
+  "cors": "^2.8.5",
+  "node-fetch": "^2.6.7"
+}
