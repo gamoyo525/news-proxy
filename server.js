@@ -1,32 +1,28 @@
 const express = require("express");
 const fetch = require("node-fetch");
 const cors = require("cors");
-const app = express();
 
+const app = express();
 app.use(cors());
-app.use(express.json()); // POSTリクエストに必要
+app.use(express.json());
 
 const NEWS_API_BASE = "https://newsapi.org";
 const TRANSLATE_API_URL = "https://libretranslate.com/translate";
 
-// NewsAPI用のプロキシ
+// NewsAPIのプロキシ
 app.use("/v2", async (req, res) => {
   const url = `${NEWS_API_BASE}${req.originalUrl}`;
-  try {
-    const response = await fetch(url, {
-      headers: {
-        "X-Requested-With": "XMLHttpRequest",
-      },
-    });
-    const data = await response.json();
-    res.json(data);
-  } catch (error) {
-    console.error("NewsAPIエラー:", error);
-    res.status(500).json({ error: "NewsAPIの取得に失敗しました" });
-  }
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const data = await response.json();
+  res.json(data);
 });
 
-// LibreTranslate用のプロキシ
+// LibreTranslateへのプロキシ
 app.post("/translate", async (req, res) => {
   try {
     const response = await fetch(TRANSLATE_API_URL, {
@@ -36,15 +32,16 @@ app.post("/translate", async (req, res) => {
       },
       body: JSON.stringify(req.body),
     });
+
     const data = await response.json();
     res.json(data);
   } catch (error) {
-    console.error("翻訳エラー:", error);
-    res.status(500).json({ error: "翻訳に失敗しました" });
+    console.error("翻訳APIプロキシエラー:", error);
+    res.status(500).json({ error: "翻訳失敗" });
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`サーバーが起動しました。ポート: ${PORT}`);
 });
