@@ -6,23 +6,14 @@ const app = express();
 app.use(cors());
 
 const BASE_URL = "https://newsapi.org";
+const API_KEY = process.env.NEWS_API_KEY;
 
 app.use("/", async (req, res) => {
-  const url = `${BASE_URL}${req.url}`;
-  console.log(`Proxying request to: ${url}`);
+  const targetUrl = `${BASE_URL}${req.url}`;
 
   try {
-    const response = await fetch(url, {
-      headers: {
-        "Authorization": req.headers["authorization"], // APIキーをフロントエンドから渡す
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch: ${response.statusText}`);
-    }
-
-    const data = await response.json(); // レスポンスを JSON で取得
+    const response = await fetch(targetUrl + `&apiKey=${API_KEY}`);
+    const data = await response.json();
     res.status(response.status).json(data);
   } catch (err) {
     console.error("Error:", err);
@@ -30,13 +21,7 @@ app.use("/", async (req, res) => {
   }
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Proxy server running on port ${port}`);
-});
-
-
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`サーバーが起動しました。ポート: ${PORT}`);
+  console.log(`Proxy server running on port ${PORT}`);
 });
