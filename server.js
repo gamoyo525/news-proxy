@@ -4,42 +4,37 @@ const cors = require("cors");
 
 const app = express();
 app.use(cors());
-app.use(express.json());
 
-const NEWS_API_BASE = "https://newsapi.org";
-const TRANSLATE_API_URL = "https://libretranslate.com/translate";
+const BASE_URL = "https://newsapi.org";
 
-// NewsAPIのプロキシ
-app.use("/v2", async (req, res) => {
-  const url = `${NEWS_API_BASE}${req.originalUrl}`;
-  const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+app.use("/", async (req, res) => {
+  const url = `${BASE_URL}${req.url}`;
+  console.log(`Proxying request to: ${url}`);
 
-  const data = await response.json();
-  res.json(data);
-});
-
-// LibreTranslateへのプロキシ
-app.post("/translate", async (req, res) => {
   try {
-    const response = await fetch(TRANSLATE_API_URL, {
-      method: "POST",
+    const response = await fetch(url, {
       headers: {
-        "Content-Type": "application/json",
+        "Authorization": req.headers["authorization"], // APIキーをフロントエンドから渡す
       },
-      body: JSON.stringify(req.body),
     });
 
-    const data = await response.json();
-    res.json(data);
-  } catch (error) {
-    console.error("翻訳APIプロキシエラー:", error);
-    res.status(500).json({ error: "翻訳失敗" });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch: ${response.statusText}`);
+    }
+
+    const data = await response.json(); // レスポンスを JSON で取得
+    res.status(response.status).json(data);
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(500).json({ error: "Proxy error" });
   }
 });
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Proxy server running on port ${port}`);
+});
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
