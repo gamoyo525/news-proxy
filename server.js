@@ -23,5 +23,14 @@ app.use("/", async (req, res) => {
     }
 
     const data = await response.json(); // レスポンスを JSON で取得
-    res.status(response.status).
-      
+    res.status(response.status).json(data);
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(500).json({ error: "Proxy error" });
+  }
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Proxy server running on port ${port}`);
+});
