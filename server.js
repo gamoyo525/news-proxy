@@ -5,7 +5,7 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 
-const BASE_URL = "https://newsapi.org";
+const BASE_URL = "https://newsapi.org/v2";
 const API_KEY = "1a5a88eb386244ff9e7f82966e28e009"; // 
 
 app.use("/", async (req, res) => {
